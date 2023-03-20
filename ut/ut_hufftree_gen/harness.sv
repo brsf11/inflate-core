@@ -22,9 +22,9 @@ logic                                            clk;
 logic                                            rst_n;
 
 logic                                            inc;
-logic [8:0]                                      tree_num;
+logic [5:0]                                      tree_num;
 logic [4:0]                                      buff_data;
-logic [8:0]                                      buff_addr_bias;
+logic [5:0]                                      buff_addr_bias;
 logic [8:0]                                      buff_addr;
 logic [7:0]                                      huff_code;
 logic [7:0]                                      huff_addr;

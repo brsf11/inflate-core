@@ -25,8 +25,8 @@ end
 
 initial begin
   inc = 1'b0;
-  tree_num = 9'd10;
-  buff_addr_bias = 9'd0;
+  tree_num = 6'd10;
+  buff_addr_bias = 6'd0;
   #300;
   inc = 1'b1;
   @(posedge clk);
