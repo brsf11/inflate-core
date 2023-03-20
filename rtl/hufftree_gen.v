@@ -30,16 +30,21 @@ module hufftree_gen #(
     localparam MATCH                    = 2'b01;
     localparam WRITE                    = 2'b10;
 
-    reg                     state,nxt_state;
+    reg [1:0]               state,nxt_state;
     reg [8:0]               buff_addr_cnt;
     reg [HUFF_LEN_LEN-1:0]  code_len_cnt;
     reg [HUFF_CODE_LEN-1:0] code;
     reg [8:0]               reg_buff_addr_cnt;
     reg [HUFF_LEN_LEN-1:0]  reg_code_len_cnt;
     reg [HUFF_CODE_LEN-1:0] buff_addr_write;
+    wire [8:0]              buff_addr_cnt_plus;
+    wire [8:0]              reg_buff_addr_cnt_plus;
+
+    assign buff_addr_cnt_plus     = buff_addr_cnt + 1'b1;
+    assign reg_buff_addr_cnt_plus = reg_buff_addr_cnt + 1'b1;
 
     always @(posedge clk or negedge rst_n)begin
-        if(!rst_n)begin
+        if(rst_n == 1'b0)begin
             state <= IDLE;
         end
         else begin
@@ -54,23 +59,23 @@ module hufftree_gen #(
                 nxt_state = inc ? MATCH : IDLE;
             end
             MATCH:begin
-                nxt_state = ((reg_code_len_cnt == HUFF_CODE_LEN) & ((reg_buff_addr_cnt + 1'b1) == tree_num)) ? IDLE : ((buff_data == reg_code_len_cnt) ? WRITE : MATCH);
+                nxt_state = ((reg_code_len_cnt == HUFF_CODE_LEN) & (reg_buff_addr_cnt_plus == tree_num)) ? IDLE : ((buff_data == reg_code_len_cnt) ? WRITE : MATCH);
             end
             WRITE:begin
-                nxt_state = ((buff_addr_write + 1'b1) == (1'b1 << reg_code_len_cnt)) ? MATCH : WRITE;
+                nxt_state = ((buff_addr_write + 1'b1) == (1'b1 << (8 - reg_code_len_cnt))) ? MATCH : WRITE;
             end
         endcase
     end
 
     always @(posedge clk or negedge rst_n)begin
-        if(!rst_n)begin
+        if(rst_n == 1'b0)begin
             buff_addr_cnt <= 9'b0;
         end
         else begin
             case(nxt_state)
                 IDLE: buff_addr_cnt <= 9'b0;
                 MATCH:begin
-                    if((buff_addr_cnt + 1'b1) == tree_num)begin
+                    if(buff_addr_cnt_plus == tree_num)begin
                         buff_addr_cnt <= 9'b0; 
                     end
                     else begin
@@ -84,14 +89,14 @@ module hufftree_gen #(
     end
 
     always @(posedge clk or negedge rst_n)begin
-        if(!rst_n)begin
-            code_len_cnt <= 0;
+        if(rst_n == 1'b0)begin
+            code_len_cnt <= 1;
         end
         else begin
             case(nxt_state)
-                IDLE: code_len_cnt <= 0;
+                IDLE: code_len_cnt <= 1;
                 MATCH:begin
-                    if((buff_addr_cnt + 1'b1) == tree_num)begin
+                    if(buff_addr_cnt_plus == tree_num)begin
                         code_len_cnt <= code_len_cnt + 1'b1; 
                     end
                     else begin
@@ -99,13 +104,13 @@ module hufftree_gen #(
                     end
                 end
                 WRITE: code_len_cnt <= code_len_cnt;
-                default: code_len_cnt <= 0;
+                default: code_len_cnt <= 1;
             endcase
         end
     end
 
     always @(posedge clk or negedge rst_n)begin
-        if(!rst_n)begin
+        if(rst_n == 1'b0)begin
             code <= 0;
         end
         else begin
@@ -133,7 +138,7 @@ module hufftree_gen #(
     end
 
     always @(posedge clk or negedge rst_n)begin
-        if(!rst_n)begin
+        if(rst_n == 1'b0)begin
             reg_buff_addr_cnt <= 0;
         end
         else begin
@@ -142,7 +147,7 @@ module hufftree_gen #(
     end
 
     always @(posedge clk or negedge rst_n)begin
-        if(!rst_n)begin
+        if(rst_n == 1'b0)begin
             reg_code_len_cnt <= 0;
         end
         else begin
@@ -151,7 +156,7 @@ module hufftree_gen #(
     end
 
     always @(posedge clk or negedge rst_n)begin
-        if(!rst_n)begin
+        if(rst_n == 1'b0)begin
             buff_addr_write <= 0;
         end
         else begin
@@ -170,5 +175,29 @@ module hufftree_gen #(
             endcase
         end
     end
+
+    wire[HUFF_CODE_LEN-1:0] huff_addr_arry[HUFF_CODE_LEN:0];
+
+    assign buff_addr = buff_addr_cnt + buff_addr_bias;
+    assign huff_code = reg_buff_addr_cnt[HUFF_CODE_LEN-1:0];
+    assign huff_addr = huff_addr_arry[reg_code_len_cnt];
+    assign huff_len  = reg_code_len_cnt;
+    assign winc      = state == WRITE;
+
+    genvar i;
+    generate
+        for(i=0;i<=HUFF_CODE_LEN;i=i+1)begin
+            if(i == 0)begin
+                assign huff_addr_arry[i] = 0;
+            end
+            else if(i>0 && i<HUFF_CODE_LEN)begin
+                assign huff_addr_arry[i] = {code[i-1:0],buff_addr_write[HUFF_CODE_LEN-i-1:0]};
+            end
+            else if(i == HUFF_CODE_LEN)begin
+                assign huff_addr_arry[i] = code;
+            end
+        end
+    endgenerate
+
 
 endmodule
