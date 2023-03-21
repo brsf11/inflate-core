@@ -5,7 +5,7 @@ COM_SIM_OPTS := vcs
 COM_USR_OPTS :=
 
 # top module for RTL
-TOP_MODULE := hufftree_gen
+TOP_MODULE := sq_extractor
 # RTL file list
 RTL_LIST := -f /mnt/hgfs/VMShare/code/inflate-core/rtl.lst
 # CBB list file for common design
@@ -15,9 +15,9 @@ SIM_LIST :=
 # synthsis file list
 SYN_LIST :=
 # sdc
-SDC_FILE := /mnt/hgfs/VMShare/code/inflate-core/lint/cm.sdc
+SDC_FILE := /mnt/hgfs/VMShare/code/inflate-core/lint/lint_sq_extractor/cm.sdc
 # sgdc
-SGDC_FILE :=
+
 # target libary
 TARGET_LIBRARY_FILES:=
 # waiver file for spyglass

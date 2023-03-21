@@ -42,7 +42,7 @@ set_input_delay  -min 0 -clock CLK0_NAME [remove_from_collection [all_inputs] [g
 
 set_output_delay -min 0 -clock CLK0_NAME [all_outputs]
 
-set_output_delay -max [expr $CLK1_SCALE_PERIOD * $OUTPUT_DELAY_SCALE_RATIO] -clock CLK0_NAME [all_outputs]
+#set_output_delay -max [expr $CLK1_SCALE_PERIOD * $OUTPUT_DELAY_SCALE_RATIO] -clock CLK0_NAME [all_outputs]
 
 #If there are more than one clock, please set the input/output delay for different clock individually
 

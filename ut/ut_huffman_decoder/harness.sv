@@ -31,6 +31,21 @@ logic [7:0]                                      huff_addr;
 logic [3:0]                                      huff_len;
 logic                                            winc;
 logic                                            finish;
+
+logic                                            pending;        
+logic                                            data_in_vld;    
+logic [7:0]                                      data_in;        
+logic                                            data_in_rdy;    
+logic [7:0]                                      huff_addr_decoder;      
+logic [3:0]                                      lit_huff_len;   
+logic [4:0]                                      lit_huff_code;  
+logic [3:0]                                      dist_huff_len;  
+logic [4:0]                                      dist_huff_code; 
+logic                                            mode;           
+logic                                            data_out_vld;   
+logic [4:0]                                      data_out;       
+logic                                            data_out_rdy;   
+
 // -------------------------------------------------------------------
 // fadb wave
 // -------------------------------------------------------------------
@@ -71,7 +86,7 @@ always #(PERIOD_CLK/2) clk = ~clk;
 
 hufftree_gen #(
     .HUFF_CODE_LEN                     (8                                      )
-    ) DUT
+    ) DUT_HUFFTREE_GEN
     (
     .clk                               (clk                                    ),
     .rst_n                             (rst_n                                  ),
@@ -86,6 +101,28 @@ hufftree_gen #(
     .winc                              (winc                                   ),
     .finish                            (finish                                 )
     );
+
+huffman_decoder #(
+    .HUFF_CODE_LEN                     (8                                      ) 
+    ) DUT_HUFFMAN_DECODER
+    (
+    .clk                               (clk                                    ),
+    .rst_n                             (rst_n                                  ),
+    .pending                           (pending                                ),
+    .data_in_vld                       (data_in_vld                            ),
+    .data_in                           (data_in                                ),
+    .data_in_rdy                       (data_in_rdy                            ),
+    .huff_addr                         (huff_addr_decoder                      ),
+    .lit_huff_len                      (lit_huff_len                           ),
+    .lit_huff_code                     (lit_huff_code                          ),
+    .dist_huff_len                     (dist_huff_len                          ),
+    .dist_huff_code                    (dist_huff_code                         ),
+    .mode                              (mode                                   ),            //mode 0 refers to standard mode, 1 refers to lz sequence decode mode
+    .data_out_vld                      (data_out_vld                           ),
+    .data_out                          (data_out                               ),
+    .data_out_rdy                      (data_out_rdy                           )
+    );
+
 
 reg [4:0] buff_mem[15:0];
 
@@ -113,6 +150,31 @@ always @(posedge clk or negedge rst_n) begin
 end
 
 assign buff_data = buff_mem[reg_buff_addr];
+
+reg [4:0] huff_code_mem[255:0];
+reg [3:0] huff_len_mem[255:0];
+
+always @(posedge clk) begin
+  if(winc == 1'b1)begin
+    huff_code_mem[huff_addr] <= huff_code;
+    huff_len_mem[huff_addr]  <= huff_len;
+  end
+end
+
+reg[7:0] reg_huff_addr_decoder;
+
+always @(posedge clk or negedge rst_n) begin
+  if(rst_n == 1'b0)begin
+    reg_huff_addr_decoder <= 8'b0;
+  end
+  else begin
+    reg_huff_addr_decoder <= huff_addr_decoder;
+  end
+end
+assign lit_huff_len   = huff_len_mem[reg_huff_addr_decoder];
+assign dist_huff_len  = huff_len_mem[reg_huff_addr_decoder];
+assign lit_huff_code  = huff_code_mem[reg_huff_addr_decoder];
+assign dist_huff_code = huff_code_mem[reg_huff_addr_decoder];
 // -------------------------------------------------------------------
 // Assertion Declarations
 // -------------------------------------------------------------------

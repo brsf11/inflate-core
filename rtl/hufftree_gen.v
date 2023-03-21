@@ -13,7 +13,8 @@ module hufftree_gen #(
     output [4:0]               huff_code,
     output [HUFF_CODE_LEN-1:0] huff_addr,
     output [HUFF_LEN_LEN-1:0]  huff_len,
-    output                     winc
+    output                     winc,
+    output reg                 finish
     );
 
     // ceilLog2 function
@@ -65,6 +66,20 @@ module hufftree_gen #(
                 nxt_state = ((huff_addr_write + 1'b1) == (1'b1 << (8 - reg_code_len_cnt))) ? MATCH : WRITE;
             end
         endcase
+    end
+
+    always @(posedge clk or negedge rst_n) begin
+        if(rst_n == 1'b0)begin
+            finish <= 1'b0;
+        end
+        else begin
+            if((nxt_state == IDLE) && (state == MATCH))begin
+                finish <= 1'b1;
+            end
+            else begin
+                finish <= 1'b0;
+            end
+        end
     end
 
     always @(posedge clk or negedge rst_n)begin
