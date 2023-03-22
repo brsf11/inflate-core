@@ -88,6 +88,14 @@ initial begin
   end
 end
 
+initial begin
+  #300;
+  while(1)begin
+    @(negedge finish);
+    $display("Extraction finished!");
+  end
+end
+
 // -------------------------------------------------------------------
 // Assertion Declarations
 // -------------------------------------------------------------------

@@ -46,6 +46,7 @@ logic                                            data_out_vld;
 logic [4:0]                                      data_out;       
 logic                                            data_out_rdy;   
 
+logic [5:0]                                      ext_bits;
 // -------------------------------------------------------------------
 // fadb wave
 // -------------------------------------------------------------------
@@ -120,7 +121,8 @@ huffman_decoder #(
     .mode                              (mode                                   ),            //mode 0 refers to standard mode, 1 refers to lz sequence decode mode
     .data_out_vld                      (data_out_vld                           ),
     .data_out                          (data_out                               ),
-    .data_out_rdy                      (data_out_rdy                           )
+    .data_out_rdy                      (data_out_rdy                           ),
+    .ext_bits                          (ext_bits                               )
     );
 
 
