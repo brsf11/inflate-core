@@ -75,10 +75,13 @@ module lz_extractor(
                     nxt_state = COPY;
                 end
             end
+            default:begin
+                nxt_state = LIT;
+            end
         endcase
     end
 
-    always @(posedge clk negedge rst_n) begin
+    always @(posedge clk or negedge rst_n) begin
         if(rst_n == 1'b0)begin
             data_in_buffer  <= 5'b0;
             ext_bits_buffer <= 6'b0;
@@ -129,7 +132,7 @@ module lz_extractor(
         end
     end
 
-    always @(posedge clk negedge rst_n) begin
+    always @(posedge clk or negedge rst_n) begin
         if(rst_n == 1'b0)begin
             buff_ptr <= 9'b0;
         end
@@ -148,7 +151,7 @@ module lz_extractor(
         end
     end
     
-    always @(posedge clk negedge rst_n) begin
+    always @(posedge clk or negedge rst_n) begin
         if(rst_n == 1'b0)begin
             len <= 9'b0;
         end
@@ -179,7 +182,7 @@ module lz_extractor(
         endcase
     end
 
-    always @(posedge clk negedge rst_n) begin
+    always @(posedge clk or negedge rst_n) begin
         if(rst_n == 1'b0)begin
             buff_data_vld <= 1'b0;
         end
@@ -290,7 +293,7 @@ module lz_extractor(
 
     //output logic
     assign data_in_rdy = (buffer_vld == 1'b0) | commit;
-    assign data_out    = (state == COPY) ? buff_data_in : data_in_buffer;
+    assign data_out    = (state == COPY) ? buff_data_in[3:0] : data_in_buffer[3:0];
 
     always @* begin
         case(state)

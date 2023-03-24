@@ -1,3 +1,4 @@
 /mnt/hgfs/VMShare/code/inflate-core/rtl/hufftree_gen.v
 /mnt/hgfs/VMShare/code/inflate-core/rtl/huffman_decoder.v
 /mnt/hgfs/VMShare/code/inflate-core/rtl/sq_extractor.v
+/mnt/hgfs/VMShare/code/inflate-core/rtl/lz_extractor.v
