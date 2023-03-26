@@ -20,15 +20,17 @@ parameter                                        PERIOD_CLK = 10;
 // -------------------------------------------------------------------
 logic                                            clk;
 logic                                            rst_n;
- 
-logic                                            flush;
-logic [4:0]                                      data_in;    
-logic                                            data_in_vld;
-logic                                            data_in_rdy;
-logic [8:0]                                      buff_addr;  
-logic [4:0]                                      buff_data; 
-logic                                            winc;       
-logic                                            finish;     
+      
+logic                                            start;
+logic                                            exit;
+logic                                      [7:0] data_in;      
+logic                                            data_in_vld;  
+logic                                            data_in_rdy;  
+logic                                      [7:0] data_out;     
+logic                                            data_out_vld; 
+logic                                            data_out_rdy; 
+logic                                            decode_finish;
+logic                                            reg_finish;
 // -------------------------------------------------------------------
 // fadb wave
 // -------------------------------------------------------------------
@@ -58,6 +60,23 @@ end
 
 always #(PERIOD_CLK/2) clk = ~clk;
 
+initial begin
+  #300;
+  while(1)begin
+    @(posedge reg_finish);
+    $display("Decode finished!");
+  end
+end
+
+always @(posedge clk or negedge rst_n) begin
+  if(rst_n == 1'b0)begin
+    reg_finish <= 1'b0;
+  end
+  else begin
+    reg_finish <= decode_finish;
+  end
+end
+
 // -------------------------------------------------------------------
 // Main Code
 // -------------------------------------------------------------------
@@ -67,17 +86,18 @@ always #(PERIOD_CLK/2) clk = ~clk;
 
 // -----------------> DUT Instance
 
-sq_extractor DUT(
-    .clk              (clk               ),
-    .rst_n            (rst_n             ),
-    .flush            (flush             ),
-    .data_in          (data_in           ),
-    .data_in_vld      (data_in_vld       ),
-    .data_in_rdy      (data_in_rdy       ),
-    .buff_addr        (buff_addr         ),
-    .buff_data        (buff_data         ),
-    .winc             (winc              ),
-    .finish           (finish            )
+inflate DUT(
+    .clk            (clk          ),
+    .rst_n          (rst_n        ),
+    .start          (start        ),
+    .exit           (exit         ),
+    .data_in        (data_in      ),
+    .data_in_vld    (data_in_vld  ),
+    .data_in_rdy    (data_in_rdy  ),
+    .data_out       (data_out     ),
+    .data_out_vld   (data_out_vld ),
+    .data_out_rdy   (data_out_rdy ),
+    .decode_finish  (decode_finish)
 );
 // -------------------------------------------------------------------
 // Assertion Declarations

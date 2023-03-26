@@ -20,18 +20,22 @@ parameter                                        PERIOD_CLK = 10;
 // -------------------------------------------------------------------
 logic                                            clk;
 logic                                            rst_n;
-        
-logic                                            en;             
-logic                                            data_in_vld;    
-logic                                      [4:0] data_in;        
-logic                                      [5:0] ext_bits;       
-logic                                            data_in_rdy;    
-logic                                            data_out_rdy;   
-logic                                      [3:0] data_out;       
-logic                                            data_out_vld;   
-logic                                      [8:0] buff_read_addr; 
+
+logic                                            en;
+logic                                            data_in_vld;
+logic                                      [4:0] data_in;
+logic                                      [5:0] ext_bits;
+logic                                            data_in_rdy;
+logic                                            data_out_rdy;
+logic                                      [3:0] data_out;
+logic                                            data_out_vld;
+logic                                      [8:0] buff_read_addr;
 logic                                      [8:0] buff_write_addr;
-logic                                      [3:0] buff_data_in;   
+logic                                      [3:0] buff_data_in;
+
+logic                                            dst_vld;
+logic                                            dst_rdy;
+logic                                      [3:0] dst_data;
 // -------------------------------------------------------------------
 // fadb wave
 // -------------------------------------------------------------------
@@ -86,6 +90,25 @@ lz_extractor DUT(
     .buff_data_in      (buff_data_in   )
 );
 
+CM_FIFO
+   #(
+    .FIFO_DEPTH                        (8                                      ),
+    .DATA_WIDTH                        (4                                      )
+    ) U_FIFO
+    (
+    .clk                               (clk                                    ),
+    .rst_n                             (rst_n                                  ),
+    .flush                             (1'b0                                   ),
+    .src_vld                           (data_out_vld                           ),
+    .src_data                          (data_out                               ),
+    .afull_th                          (3'b100                                 ),
+    .dst_rdy                           (dst_rdy                                ),
+    .aempty_th                         (3'b001                                 ),
+    .src_rdy                           (data_out_rdy                           ),
+    .dst_vld                           (dst_vld                                ),
+    .dst_data                          (dst_data                               )
+    );
+
 reg [4:0] buff_mem[511:0];
 
 
@@ -101,7 +124,7 @@ end
 
 always @(posedge clk) begin
   if(data_out_vld & data_out_rdy)begin
-    buff_mem[buff_write_addr] = {1'b0,data_out};
+    buff_mem[buff_write_addr] <= {1'b0,data_out};
   end
 end
 

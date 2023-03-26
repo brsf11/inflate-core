@@ -1,5 +1,6 @@
 module sq_extractor(
     input            clk,rst_n,
+    input            flush,
     input [4:0]      data_in,
     input            data_in_vld,
     output reg       data_in_rdy,
@@ -20,16 +21,21 @@ module sq_extractor(
             tree_cnt <= 6'b0;
         end
         else begin
-            if(winc == 1'b1)begin
-                if(tree_cnt >= 6'b101100)begin
-                    tree_cnt <= 6'd0;
-                end
-                else begin
-                    tree_cnt <= tree_cnt + 1'b1;
-                end
+            if(flush == 1'b1)begin
+                tree_cnt <= 6'd0;
             end
             else begin
-                tree_cnt <= tree_cnt;
+                if(winc == 1'b1)begin
+                    if(tree_cnt >= 6'b101100)begin
+                        tree_cnt <= 6'd0;
+                    end
+                    else begin
+                        tree_cnt <= tree_cnt + 1'b1;
+                    end
+                end
+                else begin
+                    tree_cnt <= tree_cnt;
+                end
             end
         end
     end

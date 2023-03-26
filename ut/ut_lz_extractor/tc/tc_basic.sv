@@ -28,7 +28,7 @@ initial begin
   data_in_vld = 1'b0;
   en = 1'b0;
   ext_bits = 6'b0;
-  data_out_rdy = 1'b0;
+  dst_rdy = 1'b0;
   #300;
   en = 1'b1;
   send_data(1,0);
@@ -39,6 +39,12 @@ initial begin
   send_data(6,0);
   send_data(7,0);
   send_data(8,0);
+  send_data(18,0);
+  send_data(3,0);
+  send_data(14,0);
+  send_data(14,0);
+  send_data(21,1);
+  send_data(5,1);
 
 end
 
@@ -59,19 +65,20 @@ task send_data(input[4:0] data,input[5:0] bits);
 endtask
 
 task recv_data();
-  data_out_rdy = 1'b1;
+  dst_rdy = 1'b1;
   @(posedge clk);
-  while(data_out_vld == 1'b0)begin
+  while(dst_vld == 1'b0)begin
     @(posedge clk);
   end
-  data_out_rdy = 1'b0;
-  $display("Decoded data:%H",data_out);
+  dst_rdy = 1'b0;
+  $display("Decoded data:%H",dst_data);
 endtask
 
 initial begin
   #300;
   while(1)begin
     recv_data();
+    repeat(2) @(posedge clk);
   end
 end
 

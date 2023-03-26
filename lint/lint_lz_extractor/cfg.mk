@@ -7,7 +7,7 @@ COM_USR_OPTS :=
 # top module for RTL
 TOP_MODULE := lz_extractor
 # RTL file list
-RTL_LIST := -f /mnt/hgfs/VMShare/code/inflate-core/rtl.lst
+RTL_LIST := -f ${SHARECODE_ROOT}/inflate-core/rtl.lst
 # CBB list file for common design
 CBB_LIST :=
 # simulate file list
@@ -15,7 +15,7 @@ SIM_LIST :=
 # synthsis file list
 SYN_LIST :=
 # sdc
-SDC_FILE := /mnt/hgfs/VMShare/code/inflate-core/lint/lint_lz_extractor/cm.sdc
+SDC_FILE := ${SHARECODE_ROOT}/inflate-core/lint/lint_lz_extractor/cm.sdc
 # sgdc
 
 # target libary

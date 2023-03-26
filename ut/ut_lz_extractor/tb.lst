@@ -1,2 +1,3 @@
-/mnt/hgfs/VMShare/code/inflate-core/rtl/lz_extractor.v
+$SHARECODE_ROOT/inflate-core/rtl/lz_extractor.v
+${CM_ROOT}/cm_fifo.v
 ./harness.sv

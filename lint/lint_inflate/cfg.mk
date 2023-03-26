@@ -5,7 +5,7 @@ COM_SIM_OPTS := vcs
 COM_USR_OPTS :=
 
 # top module for RTL
-TOP_MODULE := sq_extractor
+TOP_MODULE := inflate
 # RTL file list
 RTL_LIST := -f ${SHARECODE_ROOT}/inflate-core/rtl.lst
 # CBB list file for common design
@@ -15,7 +15,7 @@ SIM_LIST :=
 # synthsis file list
 SYN_LIST :=
 # sdc
-SDC_FILE := ${SHARECODE_ROOT}/inflate-core/lint/lint_sq_extractor/cm.sdc
+SDC_FILE := ${SHARECODE_ROOT}/inflate-core/lint/lint_inflate/cm.sdc
 # sgdc
 
 # target libary

@@ -1,2 +1,2 @@
-/mnt/hgfs/VMShare/code/inflate-core/rtl/hufftree_gen.v
+$SHARECODE_ROOT/inflate-core/rtl/hufftree_gen.v
 ./harness.sv

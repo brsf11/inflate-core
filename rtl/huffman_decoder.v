@@ -6,6 +6,7 @@ module huffman_decoder #(
     input                      clk,
     input                      rst_n,
     input                      pending,
+    input                      flush,
     input                      data_in_vld,
     input [7:0]                data_in,
     output                     data_in_rdy,
@@ -35,8 +36,6 @@ module huffman_decoder #(
     reg [4:0]  buffer_pointer; // point to last valid buffer data bit
     reg        dist_sel;
 
-    wire [HUFF_LEN_LEN-1:0] mux_huff_len;
-    assign mux_huff_len = dist_sel ? dist_huff_len : lit_huff_len;
     
     wire [HUFF_LEN_LEN-1:0] final_len;
 
@@ -47,22 +46,28 @@ module huffman_decoder #(
             buffer_pointer <= 5'd16;
         end
         else begin
-            if(pending == 1'b1)begin
+            if(flush == 1'b1)begin
                 huff_code_vld  <= 1'b0;
-                buffer_pointer <= buffer_pointer; 
+                buffer_pointer <= 5'd16;
             end
             else begin
-                if((data_out_vld & data_out_rdy) == 1'b1)begin
+                if(pending == 1'b1)begin
                     huff_code_vld  <= 1'b0;
-                    buffer_pointer <= buffer_pointer + final_len; 
-                end
-                else if((data_in_rdy & data_in_vld) == 1'b1)begin
-                    huff_code_vld  <= 1'b0;
-                    buffer_pointer <= buffer_pointer - 8; 
+                    buffer_pointer <= buffer_pointer; 
                 end
                 else begin
-                    huff_code_vld  <= 1'b1;
-                    buffer_pointer <= buffer_pointer; 
+                    if((data_out_vld & data_out_rdy) == 1'b1)begin
+                        huff_code_vld  <= 1'b0;
+                        buffer_pointer <= buffer_pointer + final_len; 
+                    end
+                    else if((data_in_rdy & data_in_vld) == 1'b1)begin
+                        huff_code_vld  <= 1'b0;
+                        buffer_pointer <= buffer_pointer - 5'b01000; 
+                    end
+                    else begin
+                        huff_code_vld  <= 1'b1;
+                        buffer_pointer <= buffer_pointer; 
+                    end
                 end
             end
         end
@@ -118,16 +123,21 @@ module huffman_decoder #(
             dist_sel <= 1'b0;
         end
         else begin
-            if((data_out_rdy & data_out_vld) == 1'b1)begin
-                if((dist_sel == 1'b0) && (data_out > 5'd16) && (mode == 1'b1))begin
-                    dist_sel <= 1'b1;
-                end
-                else begin
-                    dist_sel <= 1'b0;
-                end
+            if(flush == 1'b1)begin
+                dist_sel <= 1'b0;
             end
             else begin
-                dist_sel <= dist_sel;
+                if((data_out_rdy & data_out_vld) == 1'b1)begin
+                    if((dist_sel == 1'b0) && (data_out > 5'd16) && (mode == 1'b1))begin
+                        dist_sel <= 1'b1;
+                    end
+                    else begin
+                        dist_sel <= 1'b0;
+                    end
+                end
+                else begin
+                    dist_sel <= dist_sel;
+                end
             end
         end
     end

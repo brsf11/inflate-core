@@ -15,9 +15,11 @@ module lz_extractor(
 );
 
     reg [4:0] data_in_buffer;
+    reg [4:0] nxt_data_in_buffer;
     reg       buffer_vld;
     reg       nxt_buffer_vld;
     reg [5:0] ext_bits_buffer;
+    reg [5:0] nxt_ext_bits_buffer;
 
     reg commit;
 
@@ -28,6 +30,7 @@ module lz_extractor(
     reg [1:0]               state,nxt_state;
 
     reg [8:0]  buff_ptr;
+    reg [8:0]  nxt_buff_ptr;
     reg [8:0]  len;
     reg [8:0]  nxt_len;
     reg        buff_data_vld;
@@ -68,7 +71,7 @@ module lz_extractor(
                 end
             end
             COPY:begin
-                if((len == 9'b0000_0000_1) && (data_out_vld == 1'b1))begin
+                if((len == 9'b0000_0000_1) && (data_out_vld == 1'b1) && (data_out_rdy == 1'b1))begin
                     nxt_state = LIT;
                 end
                 else begin
@@ -87,21 +90,26 @@ module lz_extractor(
             ext_bits_buffer <= 6'b0;
         end
         else begin
-            if(en == 1'b0)begin
-                data_in_buffer  <= 5'b0;
-                ext_bits_buffer <= 6'b0;
-            end
-            else begin
-                if((data_in_vld == 1'b1) && (data_in_rdy == 1'b1))begin
-                    data_in_buffer  <= data_in;
-                    ext_bits_buffer <= ext_bits;
-                end 
-                else begin
-                    data_in_buffer  <= data_in_buffer;
-                    ext_bits_buffer <= ext_bits_buffer;
-                end  
-            end
+            data_in_buffer  <= nxt_data_in_buffer;
+            ext_bits_buffer <= nxt_ext_bits_buffer;
         end 
+    end
+
+    always @* begin
+        if(en == 1'b0)begin
+            nxt_data_in_buffer  = 5'b0;
+            nxt_ext_bits_buffer = 6'b0;
+        end
+        else begin
+            if((data_in_vld == 1'b1) && (data_in_rdy == 1'b1))begin
+                nxt_data_in_buffer  = data_in;
+                nxt_ext_bits_buffer = ext_bits;
+            end 
+            else begin
+                nxt_data_in_buffer  = data_in_buffer;
+                nxt_ext_bits_buffer = ext_bits_buffer;
+            end
+        end
     end
 
     always @(posedge clk or negedge rst_n) begin
@@ -119,7 +127,7 @@ module lz_extractor(
     end
 
     always @* begin
-        if(data_in_rdy == 1'b1)begin
+        if((data_in_rdy == 1'b1) && (data_in_vld == 1'b1))begin
             nxt_buffer_vld = 1'b1;
         end
         else begin
@@ -137,16 +145,20 @@ module lz_extractor(
             buff_ptr <= 9'b0;
         end
         else begin
-            if(en == 1'b0)begin
-                buff_ptr <= 9'b0;
+            buff_ptr <= nxt_buff_ptr;
+        end
+    end
+
+    always @* begin
+        if(en == 1'b0)begin
+            nxt_buff_ptr = 9'b0;
+        end
+        else begin
+            if((data_out_vld == 1'b1) && (data_out_rdy == 1'b1))begin
+                nxt_buff_ptr = buff_ptr + 1'b1;
             end
             else begin
-                if((data_out_vld == 1'b1) && (data_out_rdy == 1'b1))begin
-                    buff_ptr <= buff_ptr + 1'b1;
-                end
-                else begin
-                    buff_ptr <= buff_ptr;
-                end
+                nxt_buff_ptr = buff_ptr;
             end
         end
     end
@@ -191,7 +203,7 @@ module lz_extractor(
                 buff_data_vld <= 1'b0;
             end
             else begin
-                buff_data_vld <= (state == COPY) ? (((data_out_rdy == 1'b1) && (data_in_vld == 1'b1)) ? 1'b0 : 1'b1) : (1'b0);
+                buff_data_vld <= (state == COPY) ? (((data_out_rdy == 1'b1) && (data_out_vld == 1'b1)) ? 1'b0 : 1'b1) : (1'b0);
             end
         end
     end
@@ -224,7 +236,7 @@ module lz_extractor(
                 end
             end
             COPY:begin
-                nxt_buff_read_addr = ((data_out_rdy == 1'b1) && (data_in_vld == 1'b1)) ? (buff_read_addr + 1'b1) : buff_read_addr;
+                nxt_buff_read_addr = ((data_out_rdy == 1'b1) && (data_out_vld == 1'b1)) ? (buff_read_addr + 1'b1) : buff_read_addr;
             end
             default:begin
                 nxt_buff_read_addr = 9'b0;

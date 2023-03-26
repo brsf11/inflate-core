@@ -4,3 +4,4 @@ $SHARECODE_ROOT/inflate-core/rtl/sq_extractor.v
 $SHARECODE_ROOT/inflate-core/rtl/lz_extractor.v
 $SHARECODE_ROOT/inflate-core/rtl/inflate.v
 $SHARECODE_ROOT/inflate-core/rtl/block_ram.v
+./harness.sv
