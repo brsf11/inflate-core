@@ -6,3 +6,8 @@ $SHARECODE_ROOT/inflate-core/rtl/inflate.v
 $SHARECODE_ROOT/inflate-core/rtl/block_ram.v
 $SHARECODE_ROOT/inflate-core/rtl/inflate_core.v
 $SHARECODE_ROOT/inflate-core/rtl/cm_fifo.v
+
+$SHARECODE_ROOT/inflate-core/ut/ut_inflate_core/AHBlite_Block_RAM.v
+$SHARECODE_ROOT/inflate-core/ut/ut_inflate_core/Block_RAM.v
+
+./harness.sv
